@@ -1,6 +1,8 @@
 
 package UI;
 import Modelo.Contacto;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import javax.swing.JOptionPane; // Para mostrar mensajes
 /**
  *
@@ -23,6 +25,16 @@ public class FormularioContacto extends javax.swing.JDialog {
         this.contacto = new Contacto(); // Se crea un nuevo contacto vacío
         btnAceptarContacto.setText("Agregar"); // Texto del botón para agregar
         setTitle("Agregar Contacto"); // Título del diálogo
+        this.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                // Si el usuario cierra con la 'X', se considera una cancelación
+                boolean accepted = false;
+                // En modo edición, también anulamos el contacto para que VentanaPrincipal
+                // no intente actualizar con datos potencialmente incompletos o no confirmados.
+                contacto = null;
+            }
+        });
     }
 
     /**

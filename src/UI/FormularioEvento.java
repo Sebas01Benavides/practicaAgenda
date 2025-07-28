@@ -6,6 +6,8 @@ package UI;
 import Modelo.Evento; 
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.time.LocalDate; 
 import java.time.LocalTime; 
 import java.time.ZoneId;
@@ -13,6 +15,8 @@ import java.util.Calendar;
 import java.util.Date;
 
 import javax.swing.JOptionPane;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerDateModel;
 
 /**
  *
@@ -21,7 +25,8 @@ import javax.swing.JOptionPane;
 public class FormularioEvento extends javax.swing.JDialog {
     private Evento evento;
     private boolean esEdicion;
-    
+    private boolean accepted = false; // <-- NUEVA BANDERA: Indica si se aceptó el formulario
+
     /**
      * Creates new form FormularioEvento
      */
@@ -29,8 +34,24 @@ public class FormularioEvento extends javax.swing.JDialog {
         super(parent, modal);
         initComponents();
         setLocationRelativeTo(parent); // Centra el formulario respecto a la ventana principal
+        this.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                // Si el usuario cierra con la 'X', se considera una cancelación
+                accepted = false;
+                // En modo edición, no anulamos el evento, simplemente no lo guardamos
+                // ya que el objeto original ya existe y no queremos perder sus datos si se cancela.
+                // Sin embargo, si tu lógica de 'Ventana' espera 'null' para no actualizar,
+                // entonces sí deberías poner 'evento = null;'.
+                // Para consistencia con el flujo de "cancelar", lo dejaremos como null.
+                evento = null;
+            }
+        });
         this.esEdicion = false; // Modo agregar
         this.evento = new Evento(); // Se crea un nuevo evento vacío
+        spinnerHora.setModel(new SpinnerDateModel());
+        JSpinner.DateEditor timeEditor = new JSpinner.DateEditor(spinnerHora, "HH:mm"); // Formato 24 horas
+        spinnerHora.setEditor(timeEditor);
         limpiarCampos(); // Limpia los campos al iniciar en modo agregar
     }
     //
@@ -40,10 +61,23 @@ public class FormularioEvento extends javax.swing.JDialog {
         setLocationRelativeTo(parent); // Centra el formulario respecto a la ventana principal
         this.esEdicion = true; // Modo edición
         this.evento = eventoAEditar; // Se referencia el evento existente
+        spinnerHora.setModel(new SpinnerDateModel());
+        JSpinner.DateEditor timeEditor = new JSpinner.DateEditor(spinnerHora, "HH:mm"); // Formato 24 horas
+        spinnerHora.setEditor(timeEditor);
         cargarDatosEvento(); // Carga los datos del evento en los campos del formulario
-        btnAgregarEvento.setText("Guardar Cambios"); // Texto del botón para editar
-        setTitle("Editar Evento"); // Título del diálogo
-        //
+        this.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                // Si el usuario cierra con la 'X', se considera una cancelación
+                accepted = false;
+                // En modo edición, no anulamos el evento, simplemente no lo guardamos
+                // ya que el objeto original ya existe y no queremos perder sus datos si se cancela.
+                // Sin embargo, si tu lógica de 'Ventana' espera 'null' para no actualizar,
+                // entonces sí deberías poner 'evento = null;'.
+                // Para consistencia con el flujo de "cancelar", lo dejaremos como null.
+                evento = null;
+            }
+        });
     }
     private void cargarDatosEvento() {
         if (evento != null) {

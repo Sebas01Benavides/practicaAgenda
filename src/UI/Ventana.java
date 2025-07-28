@@ -77,23 +77,19 @@ public class Ventana extends javax.swing.JFrame {
     
     public class ModeloTablaEvento extends AbstractTableModel {
 
-        // Columnas para la tabla de eventos: Nombre del Evento, Fecha y Hora
-        private final String[] columnas = {"Nombre Evento", "Fecha", "Hora"}; // Añadida columna Hora
+        // Se han añadido las columnas "Hora" y "Descripción"
+        private final String[] columnas = {"Nombre Evento", "Fecha", "Hora", "Descripción"};
         private List<Evento> lista;
-        // Formateador para mostrar la fecha en un formato legible
         private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm"); // Formato 24 horas
+        private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
-        /**
-         * Constructor del modelo de tabla de eventos.
-         * @param lista La lista de objetos Evento a mostrar.
-         */
         public ModeloTablaEvento(List<Evento> lista) {
             this.lista = lista;
         }
+
         public void setListaEventos(List<Evento> nuevaLista) {
             this.lista = nuevaLista;
-            fireTableDataChanged(); // Notifica a la vista que los datos han cambiado
+            fireTableDataChanged();
         }
 
         @Override
@@ -110,9 +106,10 @@ public class Ventana extends javax.swing.JFrame {
         public Object getValueAt(int rowIndex, int columnIndex) {
             Evento e = lista.get(rowIndex);
             switch (columnIndex) {
-                case 0: return e.getNombreEvento(); // Muestra el nombre del evento
-                case 1: return e.getFecha() != null ? e.getFecha().format(dateFormatter) : ""; // Muestra la fecha formateada
+                case 0: return e.getNombreEvento();
+                case 1: return e.getFecha() != null ? e.getFecha().format(dateFormatter) : "";
                 case 2: return e.getHora() != null ? e.getHora().format(timeFormatter) : ""; // Muestra la hora formateada
+                case 3: return e.getDescripcion(); // <-- Se ha añadido la descripción
                 default: return "";
             }
         }
@@ -193,8 +190,6 @@ public class Ventana extends javax.swing.JFrame {
                 btnBuscarContactoActionPerformed(evt);
             }
         });
-
-        txtBusquedaContacto.setText("Buscar contacto");
 
         btnAgregarContacto.setText("Agregar contacto");
         btnAgregarContacto.addActionListener(new java.awt.event.ActionListener() {
