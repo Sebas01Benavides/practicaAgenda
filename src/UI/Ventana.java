@@ -3,17 +3,29 @@ import javax.swing.table.AbstractTableModel;
 import java.util.List;
 import java.util.ArrayList;
 import Modelo.Contacto;
-import Modelo.Evento; // Importación necesaria para la clase Evento
-import java.time.format.DateTimeFormatter; // Para formatear fechas y horas
-import com.toedter.calendar.JCalendar; // Importación necesaria para JCalendar
+import Modelo.Evento;
+import DAO.ContactosDAO; 
+import DAO.EventosDAO;
+import com.jtattoo.plaf.acryl.AcrylLookAndFeel;
+import com.jtattoo.plaf.fast.FastLookAndFeel;
+import com.jtattoo.plaf.noire.NoireLookAndFeel;
+import com.jtattoo.plaf.smart.SmartLookAndFeel;
 import javax.swing.JOptionPane;
+import java.time.format.DateTimeFormatter;
+import com.toedter.calendar.JCalendar; 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.ImageIcon;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.plaf.multi.MultiLookAndFeel;
 /**
  *
  * @author sebas
  */
 public class Ventana extends javax.swing.JFrame {
-    private List<Contacto> contactosPrueba = new ArrayList<>();
-    private List<Evento> eventosPrueba = new ArrayList<>();
+    private ContactosDAO contactoDAO;
+    private EventosDAO eventoDAO;
 
     /**
      * Constructor de la Ventana.
@@ -23,25 +35,33 @@ public class Ventana extends javax.swing.JFrame {
     public Ventana() {
         initComponents(); // Llama al método initComponents() generado por NetBeans
         setLocationRelativeTo(null); // Centra la ventana en la pantalla
-
+        setIconImage(new ImageIcon(getClass().getResource("/Imagenes/icono.jpeg")).getImage());
+        // Inicializamos las instancias de los DAOs
+        contactoDAO = new ContactosDAO();
+        eventoDAO = new EventosDAO();
         // Aquí es donde se establece el modelo para tablaContactos y tablaEventos
-        tablaContactos.setModel(new ModeloTablaContacto(contactosPrueba));
-        tablaEventos.setModel(new ModeloTablaEvento(eventosPrueba)); // Se re-añade la configuración del modelo de eventos
+        tablaContactos.setModel(new ModeloTablaContacto(new ArrayList<>()));
+        tablaEventos.setModel(new ModeloTablaEvento(new ArrayList<>()));
 
-        // Carga y actualiza las tablas al iniciar la aplicación
+        // Carga y actualiza las tablas al iniciar la aplicación desde la base de datos
         actualizarTablaContactos();
-        actualizarTablaEventos(); 
+        actualizarTablaEventos();
     }
 
     public class ModeloTablaContacto extends AbstractTableModel {
-
-        private final String[] columnas = {"Nombre", "Correo", "Teléfono", "Dirección"};
+        private final String[] columnas = {"ID", "Nombre", "Teléfono", "Email"};
         private List<Contacto> lista;
-
+        /**
+         * Constructor del modelo de tabla de contactos.
+         * @param lista La lista de objetos Contacto a mostrar.
+         */
         public ModeloTablaContacto(List<Contacto> lista) {
             this.lista = lista;
         }
-
+        /**
+         * Establece una nueva lista de contactos y notifica a la tabla para que se actualice.
+         * @param nuevaLista La nueva lista de contactos.
+         */
         public void setListaContactos(List<Contacto> nuevaLista) {
             this.lista = nuevaLista;
             fireTableDataChanged(); // Notifica a la vista que los datos han cambiado
@@ -61,10 +81,10 @@ public class Ventana extends javax.swing.JFrame {
         public Object getValueAt(int rowIndex, int columnIndex) {
             Contacto c = lista.get(rowIndex);
             switch (columnIndex) {
-                case 0: return c.getNombres() + " " + c.getApellidos();
-                case 1: return c.getEmail();
+                case 0: return c.getId(); // Retorna el ID del contacto
+                case 1: return c.getNombres() + " " + c.getApellidos();
                 case 2: return c.getTelefono();
-                case 3: return c.getDireccion();
+                case 3: return c.getEmail();
                 default: return "";
             }
         }
@@ -74,22 +94,35 @@ public class Ventana extends javax.swing.JFrame {
             return columnas[column];
         }
     }
-    
+
+    /**
+     * Modelo de tabla personalizado para mostrar objetos Evento en un JTable.
+     * 
+     */
     public class ModeloTablaEvento extends AbstractTableModel {
 
-        // Se han añadido las columnas "Hora" y "Descripción"
-        private final String[] columnas = {"Nombre Evento", "Fecha", "Hora", "Descripción"};
+        // Columnas para la tabla de eventos: ID, Nombre Evento, Fecha, Hora, Descripción
+        private final String[] columnas = {"ID", "Nombre Evento", "Fecha", "Hora", "Descripción"};
         private List<Evento> lista;
+        // Formateadores para mostrar la fecha y hora en un formato legible
         private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
+        /**
+         * Constructor del modelo de tabla de eventos.
+         * @param lista La lista de objetos Evento a mostrar.
+         */
         public ModeloTablaEvento(List<Evento> lista) {
             this.lista = lista;
         }
 
+        /**
+         * Establece una nueva lista de eventos y notifica a la tabla para que se actualice.
+         * @param nuevaLista La nueva lista de eventos.
+         */
         public void setListaEventos(List<Evento> nuevaLista) {
             this.lista = nuevaLista;
-            fireTableDataChanged();
+            fireTableDataChanged(); // Notifica a la vista que los datos han cambiado
         }
 
         @Override
@@ -106,10 +139,11 @@ public class Ventana extends javax.swing.JFrame {
         public Object getValueAt(int rowIndex, int columnIndex) {
             Evento e = lista.get(rowIndex);
             switch (columnIndex) {
-                case 0: return e.getNombreEvento();
-                case 1: return e.getFecha() != null ? e.getFecha().format(dateFormatter) : "";
-                case 2: return e.getHora() != null ? e.getHora().format(timeFormatter) : ""; // Muestra la hora formateada
-                case 3: return e.getDescripcion(); // <-- Se ha añadido la descripción
+                case 0: return e.getId(); // Retorna el ID del evento
+                case 1: return e.getNombreEvento();
+                case 2: return e.getFecha() != null ? e.getFecha().format(dateFormatter) : "";
+                case 3: return e.getHora() != null ? e.getHora().format(timeFormatter) : "";
+                case 4: return e.getDescripcion();
                 default: return "";
             }
         }
@@ -119,15 +153,21 @@ public class Ventana extends javax.swing.JFrame {
             return columnas[column];
         }
     }
-        
+
+    /**
+     * Método para recargar la tabla de contactos desde la base de datos.
+     */
     private void actualizarTablaContactos() {
-        // Por ahora, solo se actualiza con la lista de prueba
-        ((ModeloTablaContacto) tablaContactos.getModel()).setListaContactos(contactosPrueba);
+        List<Contacto> contactos = contactoDAO.obtenerTodosContactos(); // Obtiene contactos de la BD
+        ((ModeloTablaContacto) tablaContactos.getModel()).setListaContactos(contactos);
     }
-    //
-   private void actualizarTablaEventos() {
-        // Por ahora, solo se actualiza con la lista de prueba
-        ((ModeloTablaEvento) tablaEventos.getModel()).setListaEventos(eventosPrueba);
+
+    /**
+     * Método para recargar la tabla de eventos desde la base de datos.
+     */
+    private void actualizarTablaEventos() {
+        List<Evento> eventos = eventoDAO.obtenerTodosEventos(); // Obtiene eventos de la BD
+        ((ModeloTablaEvento) tablaEventos.getModel()).setListaEventos(eventos);
     }
     /**
      * This method is called from within the constructor to initialize the form.
@@ -153,6 +193,7 @@ public class Ventana extends javax.swing.JFrame {
         btnAgregarEvento = new javax.swing.JButton();
         btnEditarEvento = new javax.swing.JButton();
         btnEliminarEvento = new javax.swing.JButton();
+        jCalendar1 = new com.toedter.calendar.JCalendar();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Agenda");
@@ -165,7 +206,7 @@ public class Ventana extends javax.swing.JFrame {
                 {null, null, null, null}
             },
             new String [] {
-                "Nombre", "Correo", "Telefono", "Email"
+                "ID", "Nombre", "Telefono", "Email"
             }
         ) {
             boolean[] canEdit = new boolean [] {
@@ -219,18 +260,18 @@ public class Ventana extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(txtBusquedaContacto, javax.swing.GroupLayout.PREFERRED_SIZE, 440, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(btnBuscarContacto, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnBuscarContacto, javax.swing.GroupLayout.PREFERRED_SIZE, 246, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 452, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGap(6, 6, 6)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(btnAgregarContacto, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(btnEditarContacto, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnEliminarContacto, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                            .addComponent(btnAgregarContacto, javax.swing.GroupLayout.DEFAULT_SIZE, 149, Short.MAX_VALUE))
+                        .addGap(18, 18, 18)
+                        .addComponent(btnEliminarContacto, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -241,15 +282,14 @@ public class Ventana extends javax.swing.JFrame {
                     .addComponent(btnBuscarContacto)
                     .addComponent(txtBusquedaContacto, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(btnAgregarContacto)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnEditarContacto)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnEliminarContacto)))
-                .addContainerGap(117, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnAgregarContacto)
+                    .addComponent(btnEliminarContacto))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnEditarContacto)
+                .addContainerGap(8, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Contactos", jPanel1);
@@ -294,27 +334,31 @@ public class Ventana extends javax.swing.JFrame {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(btnAgregarEvento, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnEditarEvento, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnEliminarEvento, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 744, Short.MAX_VALUE)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(btnAgregarEvento)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnEditarEvento, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(btnEliminarEvento)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jCalendar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(btnAgregarEvento)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnEditarEvento)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnEliminarEvento))
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(301, Short.MAX_VALUE))
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnAgregarEvento)
+                    .addComponent(btnEditarEvento)
+                    .addComponent(btnEliminarEvento))
+                .addGap(18, 18, 18)
+                .addComponent(jCalendar1, javax.swing.GroupLayout.PREFERRED_SIZE, 183, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(20, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Agenda", jPanel2);
@@ -328,24 +372,37 @@ public class Ventana extends javax.swing.JFrame {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jTabbedPane1)
-                .addContainerGap())
+                .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 423, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 6, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnEditarEventoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditarEventoActionPerformed
-int filaSeleccionada = tablaEventos.getSelectedRow();
+        int filaSeleccionada = tablaEventos.getSelectedRow();
         if (filaSeleccionada >= 0) {
-            Evento eventoSeleccionado = eventosPrueba.get(filaSeleccionada);
-            FormularioEvento formulario = new FormularioEvento(this, true, eventoSeleccionado);
-            formulario.setVisible(true);
-            Evento eventoActualizado = formulario.getEvento();
-            if (eventoActualizado != null) {
-                eventosPrueba.set(filaSeleccionada, eventoActualizado);
-                actualizarTablaEventos();
-                JOptionPane.showMessageDialog(this, "Evento actualizado exitosamente.", "Información", JOptionPane.INFORMATION_MESSAGE);
+            // Obtenemos el ID del evento de la tabla
+            int eventoId = (int) tablaEventos.getValueAt(filaSeleccionada, 0);
+
+            // Obtenemos el evento completo desde la base de datos usando su ID
+            Evento eventoAEditar = eventoDAO.obtenerEventoPorId(eventoId);
+
+            if (eventoAEditar != null) {
+                FormularioEvento formulario = new FormularioEvento(this, true, eventoAEditar);
+                formulario.setVisible(true);
+
+                // Solo procede si el formulario fue aceptado
+                if (formulario.getEvento() != null) { // isAccepted() se reemplaza por getEvento() != null
+                    if (eventoDAO.actualizarEvento(formulario.getEvento())) { // Actualiza en la BD
+                        actualizarTablaEventos(); // Recarga la tabla desde la BD
+                        JOptionPane.showMessageDialog(this, "Evento actualizado exitosamente.", "Información", JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Error al actualizar evento.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "No se pudo cargar el evento para editar.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         } else {
             JOptionPane.showMessageDialog(this, "Por favor, seleccione un evento para editar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
@@ -353,46 +410,63 @@ int filaSeleccionada = tablaEventos.getSelectedRow();
     }//GEN-LAST:event_btnEditarEventoActionPerformed
         
     private void btnAgregarEventoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregarEventoActionPerformed
-    FormularioEvento formulario = new FormularioEvento(this, true);
+     FormularioEvento formulario = new FormularioEvento(this, true);
         formulario.setVisible(true);
-        Evento nuevo = formulario.getEvento();
-        if (nuevo != null) {
-            eventosPrueba.add(nuevo);
-            actualizarTablaEventos();
-            JOptionPane.showMessageDialog(this, "Evento agregado exitosamente.", "Información", JOptionPane.INFORMATION_MESSAGE);
+        // Solo procede si el formulario devolvió un evento no nulo
+        if (formulario.getEvento() != null) { // isAccepted() se reemplaza por getEvento() != null
+            Evento nuevo = formulario.getEvento();
+            if (eventoDAO.guardarEvento(nuevo)) { // Guarda en la BD
+                actualizarTablaEventos(); // Recarga la tabla desde la BD
+                JOptionPane.showMessageDialog(this, "Evento agregado exitosamente.", "Información", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Error al agregar evento.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }//GEN-LAST:event_btnAgregarEventoActionPerformed
 
     private void btnAgregarContactoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregarContactoActionPerformed
-        FormularioContacto formulario = new FormularioContacto(this, true);
+            FormularioContacto formulario = new FormularioContacto(this, true);
         formulario.setVisible(true);
-        Contacto nuevo = formulario.getContacto();
-        if (nuevo != null) {
-            contactosPrueba.add(nuevo);
-            actualizarTablaContactos();
-            JOptionPane.showMessageDialog(this, "Contacto agregado exitosamente.", "Información", JOptionPane.INFORMATION_MESSAGE);
-        }        // TODO add your handling code here:
+        // Solo procede si el formulario fue aceptado y devolvió un contacto no nulo
+        if (formulario.getContacto() != null) { // isAccepted() se reemplaza por getContacto() != null
+            Contacto nuevo = formulario.getContacto();
+            if (contactoDAO.guardarContacto(nuevo)) { // Guarda en la BD
+                actualizarTablaContactos(); // Recarga la tabla desde la BD
+                JOptionPane.showMessageDialog(this, "Contacto agregado exitosamente.", "Información", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Error al agregar contacto.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }//GEN-LAST:event_btnAgregarContactoActionPerformed
 
     private void btnEditarContactoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditarContactoActionPerformed
         int filaSeleccionada = tablaContactos.getSelectedRow();
         if (filaSeleccionada >= 0) {
-            Contacto contactoSeleccionado = contactosPrueba.get(filaSeleccionada);
-
-            FormularioContacto formulario = new FormularioContacto(this, true, contactoSeleccionado);
-
-            formulario.setVisible(true);
-
-            Contacto contactoActualizado = formulario.getContacto();
-
-            if (contactoActualizado != null) {
-                contactosPrueba.set(filaSeleccionada, contactoActualizado);
-                actualizarTablaContactos();
-                JOptionPane.showMessageDialog(this, "Contacto actualizado exitosamente.", "Información", JOptionPane.INFORMATION_MESSAGE);
+            // Obtenemos el ID del contacto de la tabla (asumiendo que la columna 0 es el ID)
+            int contactoId = (int) tablaContactos.getValueAt(filaSeleccionada, 0);
+            // Obtenemos el contacto completo desde la base de datos usando su ID
+            Contacto contactoAEditar = contactoDAO.obtenerContactoPorId(contactoId);
+            if (contactoAEditar != null) {
+                FormularioContacto formulario = new FormularioContacto(this, true, contactoAEditar);
+                formulario.setVisible(true);
+                // Solo procede si el formulario fue aceptado
+                if (formulario.getContacto() != null) { // isAccepted() se reemplaza por getContacto() != null
+                    // El objeto 'contactoAEditar' ya fue modificado directamente por el diálogo
+                    // si el formulario opera de esa manera. Si devuelve un nuevo objeto,
+                    // se usa el que devuelve el formulario.
+                    if (contactoDAO.actualizarContacto(formulario.getContacto())) { // Actualiza en la BD
+                        actualizarTablaContactos(); // Recarga la tabla desde la BD
+                        JOptionPane.showMessageDialog(this, "Contacto actualizado exitosamente.", "Información", JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Error al actualizar contacto.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "No se pudo cargar el contacto para editar.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         } else {
             JOptionPane.showMessageDialog(this, "Por favor, seleccione un contacto para editar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
-        }        
+        }
     }//GEN-LAST:event_btnEditarContactoActionPerformed
 
     private void btnEliminarContactoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarContactoActionPerformed
@@ -400,29 +474,29 @@ int filaSeleccionada = tablaEventos.getSelectedRow();
         if (filaSeleccionada >= 0) {
             int confirmacion = JOptionPane.showConfirmDialog(this, "¿Está seguro de que desea eliminar este contacto?", "Confirmar Eliminación", JOptionPane.YES_NO_OPTION);
             if (confirmacion == JOptionPane.YES_OPTION) {
-                Contacto contactoAEliminar = contactosPrueba.get(filaSeleccionada);
-                contactosPrueba.remove(filaSeleccionada);
-                actualizarTablaContactos();
-                JOptionPane.showMessageDialog(this, "Contacto eliminado exitosamente.", "Información", JOptionPane.INFORMATION_MESSAGE);
+                // Obtenemos el ID del contacto de la tabla
+                int contactoId = (int) tablaContactos.getValueAt(filaSeleccionada, 0);
+                if (contactoDAO.eliminarContacto(contactoId)) { // Elimina de la BD
+                    actualizarTablaContactos(); // Recarga la tabla desde la BD
+                    JOptionPane.showMessageDialog(this, "Contacto eliminado exitosamente.", "Información", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Error al eliminar contacto.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
         } else {
             JOptionPane.showMessageDialog(this, "Por favor, seleccione un contacto para eliminar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
-        }        
+        }
     }//GEN-LAST:event_btnEliminarContactoActionPerformed
 
     private void btnBuscarContactoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarContactoActionPerformed
-        String textoBusqueda = txtBusquedaContacto.getText().toLowerCase();
-        List<Contacto> resultadosBusqueda = new ArrayList<>();
-        for (Contacto c : contactosPrueba) {
-            if (c.getNombres().toLowerCase().contains(textoBusqueda) ||
-                c.getApellidos().toLowerCase().contains(textoBusqueda) ||
-                c.getEmail().toLowerCase().contains(textoBusqueda) ||
-                c.getTelefono().toLowerCase().contains(textoBusqueda) ||
-                c.getDireccion().toLowerCase().contains(textoBusqueda)) {
-                resultadosBusqueda.add(c);
-            }
+        String textoBusqueda = txtBusquedaContacto.getText().trim();
+        List<Contacto> resultadosBusqueda;
+        if (textoBusqueda.isEmpty()) {
+            resultadosBusqueda = contactoDAO.obtenerTodosContactos(); // Si está vacío, muestra todos
+        } else {
+            resultadosBusqueda = contactoDAO.buscarContactos(textoBusqueda); // Busca en la BD
         }
-        ((ModeloTablaContacto) tablaContactos.getModel()).setListaContactos(resultadosBusqueda);        // TODO add your handling code here:
+        ((ModeloTablaContacto) tablaContactos.getModel()).setListaContactos(resultadosBusqueda);
     }//GEN-LAST:event_btnBuscarContactoActionPerformed
 
     private void btnEliminarEventoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarEventoActionPerformed
@@ -430,10 +504,14 @@ int filaSeleccionada = tablaEventos.getSelectedRow();
         if (filaSeleccionada >= 0) {
             int confirmacion = JOptionPane.showConfirmDialog(this, "¿Está seguro de que desea eliminar este evento?", "Confirmar Eliminación", JOptionPane.YES_NO_OPTION);
             if (confirmacion == JOptionPane.YES_OPTION) {
-                Evento eventoAEliminar = eventosPrueba.get(filaSeleccionada);
-                eventosPrueba.remove(filaSeleccionada);
-                actualizarTablaEventos();
-                JOptionPane.showMessageDialog(this, "Evento eliminado exitosamente.", "Información", JOptionPane.INFORMATION_MESSAGE);
+                // Obtenemos el ID del evento de la tabla
+                int eventoId = (int) tablaEventos.getValueAt(filaSeleccionada, 0);
+                if (eventoDAO.eliminarEvento(eventoId)) { // Elimina de la BD
+                    actualizarTablaEventos(); // Recarga la tabla desde la BD
+                    JOptionPane.showMessageDialog(this, "Evento eliminado exitosamente.", "Información", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Error al eliminar evento.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
         } else {
             JOptionPane.showMessageDialog(this, "Por favor, seleccione un evento para eliminar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
@@ -470,11 +548,15 @@ int filaSeleccionada = tablaEventos.getSelectedRow();
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
+                try {
+                    UIManager.setLookAndFeel(new FastLookAndFeel());
+                } catch (UnsupportedLookAndFeelException ex) {
+                    Logger.getLogger(Ventana.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 new Ventana().setVisible(true);
             }
         });
     }
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAgregarContacto;
     private javax.swing.JButton btnAgregarEvento;
@@ -483,6 +565,7 @@ int filaSeleccionada = tablaEventos.getSelectedRow();
     private javax.swing.JButton btnEditarEvento;
     private javax.swing.JButton btnEliminarContacto;
     private javax.swing.JButton btnEliminarEvento;
+    private com.toedter.calendar.JCalendar jCalendar1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;

@@ -31,7 +31,6 @@ public class FormularioContacto extends javax.swing.JDialog {
                 // Si el usuario cierra con la 'X', se considera una cancelación
                 boolean accepted = false;
                 // En modo edición, también anulamos el contacto para que VentanaPrincipal
-                // no intente actualizar con datos potencialmente incompletos o no confirmados.
                 contacto = null;
             }
         });
@@ -59,7 +58,6 @@ public class FormularioContacto extends javax.swing.JDialog {
             txtApellidos.setText(contacto.getApellidos());
             txtTelefono.setText(contacto.getTelefono());
             txtEmail.setText(contacto.getEmail());
-            txtDireccion.setText(contacto.getDireccion());
         }
     }
     public Contacto getContacto() { // ¡Importante: este método debe ser público!
@@ -78,12 +76,10 @@ public class FormularioContacto extends javax.swing.JDialog {
         jLabel7 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
-        jLabel10 = new javax.swing.JLabel();
         txtNombre = new javax.swing.JTextField();
         txtApellidos = new javax.swing.JTextField();
         txtTelefono = new javax.swing.JTextField();
         txtEmail = new javax.swing.JTextField();
-        txtDireccion = new javax.swing.JTextField();
         btnAceptarContacto = new javax.swing.JButton();
         btnCancelarContacto = new javax.swing.JButton();
 
@@ -96,8 +92,6 @@ public class FormularioContacto extends javax.swing.JDialog {
         jLabel8.setText("Teléfono");
 
         jLabel9.setText("Email");
-
-        jLabel10.setText("Dirección");
 
         btnAceptarContacto.setText("Aceptar");
         btnAceptarContacto.addActionListener(new java.awt.event.ActionListener() {
@@ -128,18 +122,16 @@ public class FormularioContacto extends javax.swing.JDialog {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                .addComponent(jLabel10, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(jLabel9, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                         .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtApellidos, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtNombre, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtTelefono, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtDireccion, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(177, Short.MAX_VALUE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(txtNombre, javax.swing.GroupLayout.DEFAULT_SIZE, 233, Short.MAX_VALUE)
+                            .addComponent(txtApellidos)
+                            .addComponent(txtTelefono)
+                            .addComponent(txtEmail))))
+                .addContainerGap(22, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -160,15 +152,11 @@ public class FormularioContacto extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel9)
                     .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel10)
-                    .addComponent(txtDireccion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
+                .addGap(40, 40, 40)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnAceptarContacto)
                     .addComponent(btnCancelarContacto))
-                .addContainerGap(99, Short.MAX_VALUE))
+                .addContainerGap(105, Short.MAX_VALUE))
         );
 
         pack();
@@ -187,7 +175,6 @@ public class FormularioContacto extends javax.swing.JDialog {
         contacto.setApellidos(txtApellidos.getText().trim());
         contacto.setTelefono(txtTelefono.getText().trim());
         contacto.setEmail(txtEmail.getText().trim());
-        contacto.setDireccion(txtDireccion.getText().trim());
 
         dispose(); // Cierra el JDialog
     }//GEN-LAST:event_btnAceptarContactoActionPerformed
@@ -242,13 +229,11 @@ public class FormularioContacto extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAceptarContacto;
     private javax.swing.JButton btnCancelarContacto;
-    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JTextField txtApellidos;
-    private javax.swing.JTextField txtDireccion;
     private javax.swing.JTextField txtEmail;
     private javax.swing.JTextField txtNombre;
     private javax.swing.JTextField txtTelefono;

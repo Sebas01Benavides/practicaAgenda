@@ -35,23 +35,21 @@
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="jLabel6" alignment="0" min="-2" pref="58" max="-2" attributes="0"/>
                           <Group type="103" alignment="0" groupAlignment="1" max="-2" attributes="0">
-                              <Component id="jLabel10" alignment="0" max="32767" attributes="0"/>
                               <Component id="jLabel9" alignment="0" max="32767" attributes="0"/>
                               <Component id="jLabel8" alignment="0" max="32767" attributes="0"/>
                               <Component id="jLabel7" alignment="0" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="txtApellidos" min="-2" pref="71" max="-2" attributes="0"/>
-                          <Component id="txtNombre" min="-2" pref="71" max="-2" attributes="0"/>
-                          <Component id="txtTelefono" min="-2" pref="71" max="-2" attributes="0"/>
-                          <Component id="txtEmail" min="-2" pref="71" max="-2" attributes="0"/>
-                          <Component id="txtDireccion" min="-2" pref="71" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                          <Component id="txtNombre" alignment="0" pref="233" max="32767" attributes="0"/>
+                          <Component id="txtApellidos" alignment="0" max="32767" attributes="0"/>
+                          <Component id="txtTelefono" alignment="0" max="32767" attributes="0"/>
+                          <Component id="txtEmail" alignment="0" max="32767" attributes="0"/>
                       </Group>
                   </Group>
               </Group>
-              <EmptySpace pref="177" max="32767" attributes="0"/>
+              <EmptySpace pref="22" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -78,17 +76,12 @@
                   <Component id="jLabel9" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="txtEmail" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="jLabel10" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="txtDireccion" alignment="3" min="-2" max="-2" attributes="0"/>
-              </Group>
-              <EmptySpace type="separate" max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="40" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="btnAceptarContacto" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="btnCancelarContacto" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace pref="99" max="32767" attributes="0"/>
+              <EmptySpace pref="105" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -114,11 +107,6 @@
         <Property name="text" type="java.lang.String" value="Email"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JLabel" name="jLabel10">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Direcci&#xf3;n"/>
-      </Properties>
-    </Component>
     <Component class="javax.swing.JTextField" name="txtNombre">
     </Component>
     <Component class="javax.swing.JTextField" name="txtApellidos">
@@ -126,8 +114,6 @@
     <Component class="javax.swing.JTextField" name="txtTelefono">
     </Component>
     <Component class="javax.swing.JTextField" name="txtEmail">
-    </Component>
-    <Component class="javax.swing.JTextField" name="txtDireccion">
     </Component>
     <Component class="javax.swing.JButton" name="btnAceptarContacto">
       <Properties>

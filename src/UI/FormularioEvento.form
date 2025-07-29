@@ -35,14 +35,17 @@
                   <Component id="jLabel4" alignment="0" min="-2" pref="37" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                  <Component id="btnCancelarEvento" min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="txtNombreEvento" max="32767" attributes="0"/>
-                  <Component id="dateChooserEvento" pref="143" max="32767" attributes="0"/>
+                  <Component id="dateChooserEvento" alignment="0" pref="324" max="32767" attributes="0"/>
+                  <Component id="spinnerHora" alignment="0" max="32767" attributes="0"/>
+                  <Group type="102" attributes="0">
+                      <Component id="btnCancelarEvento" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                  </Group>
                   <Component id="txtDescripcion" max="32767" attributes="0"/>
-                  <Component id="spinnerHora" max="32767" attributes="0"/>
               </Group>
-              <EmptySpace pref="84" max="32767" attributes="0"/>
+              <EmptySpace min="-2" pref="87" max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -72,9 +75,9 @@
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="jLabel3" min="-2" max="-2" attributes="0"/>
-                  <Component id="txtDescripcion" min="-2" pref="79" max="-2" attributes="0"/>
+                  <Component id="txtDescripcion" min="-2" pref="62" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace pref="25" max="32767" attributes="0"/>
+              <EmptySpace pref="42" max="32767" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="btnAgregarEvento" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="btnCancelarEvento" alignment="3" min="-2" max="-2" attributes="0"/>
